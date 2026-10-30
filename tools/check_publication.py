@@ -10,6 +10,17 @@ OFFICIAL = {
     'vendor/age/darwin-arm64/age': '4012dfc2725883beafb710894af4f599b7a94f8c8e0f51f02cc96ab8df33915e',
     'vendor/age/darwin-arm64/age-keygen': 'c16e229245123d0ad27442317461d63915416cad0294395cd19ca93feb3211ea',
 }
+
+# Visually reviewed screenshots; any byte change requires a fresh review.
+REVIEWED_IMAGES = {
+    '界面预览/加密备份.png': 'fc0fd0061d26d79be0cdea9bea462e1816b9e9fc350c6bb73eb4821dadd26f20',
+    '界面预览/解密恢复.png': '9cc0a8b70baa9a5f89ab0ecbb19d73cb69feb889d9ca1f136f592812cf428ac8',
+    '界面预览/校验恢复.png': '1fde0aa055e30d249c4505fac097d2cc42031e8f3fd070dc7667c74963d04d96',
+    '界面预览/密钥位置.png': '484c32e653921d36d2004d86458da4019d5827eda750a894a9c664723699862c',
+    '界面预览/浅色.jpg': '177a0f19cbf806e3f0eb617be83013b8078dd5615e5343d63b9f021ca5f7788d',
+    '界面预览/深色.jpg': '395ad72b994584ad95c7a5bc87d17cab68220b7b168f904c91eeab6b4bedee65',
+}
+
 PATTERNS = {
     'full age private key': rb'AGE-SECRET-KEY-1[0-9A-Z]{58}',
     'full age public key': rb'age1[0-9a-z]{58}',
@@ -22,6 +33,10 @@ FORBIDDEN = {'.key', '.pem', '.p12', '.pfx', '.1pux', '.1pif', '.age', '.zip', '
 
 def check(name, data):
     errors = []
+    if name in REVIEWED_IMAGES:
+        if hashlib.sha256(data).hexdigest() != REVIEWED_IMAGES[name]:
+            return ['reviewed screenshot hash mismatch; inspect before publishing']
+        return []
     p = Path(name)
     if p.suffix.lower() in FORBIDDEN or (p.suffix.lower() == '.txt' and p.name != 'LICENSE-age.txt'):
         errors.append('key/backup/archive/unreviewed image filename')
@@ -59,7 +74,7 @@ def main():
     if failed:
         raise SystemExit(1)
     print('PASS:', len(files), 'tracked files; no personal key/backup/configuration detected.')
-    print('Official age binaries accepted only by exact SHA256.')
+    print('Official age binaries and visually reviewed screenshots accepted only by exact SHA256.')
 
 
 if __name__ == '__main__':
